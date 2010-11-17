@@ -41,6 +41,7 @@ function rental_theme() { // --------------- hook theme -----------------------
                 'rental_quick_search_form' => array( 'arguments' => array() ),
                 'rental_image_form' => array( 'arguments' => array() ),
                 'rental_post_form' => array( 'arguments' => array() ),
+                'rental_lead_first_ad_form' => array( 'arguments' => array() ),
               );
 }
 // ----------------------------------------- hook user ------------------------

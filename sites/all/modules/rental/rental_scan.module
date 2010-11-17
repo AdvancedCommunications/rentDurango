@@ -156,9 +156,8 @@ function rental_lead_contact_detail($lid) {
   return '';
 }
 function rental_lead_first_ad_form($lid) {
-  $rf = rental_form();
-  $pf = rental_post_form();
-  return array_merge($rf, $pf);
+  $form = array_merge(rental_form(), rental_post_form());
+  return $form;
 }
 function rental_lead_ad_detail($lid) {
   $d = rental_get_ad_date_range_array();
@@ -177,6 +176,60 @@ function rental_lead_detail_title($lid) {
   $q = db_query("SELECT contact_info FROM { lead } WHERE lid = %d", $lid);
   $t = db_fetch_object($q);
   return '<h3>Info For ' . $t->contact_info . '</h3>';
+}
+function theme_rental_lead_first_ad_form($form) {
+  jquery_ui_add('ui.datepicker');
+  drupal_add_js('$(function() {$(".datepicker").datepicker();});','inline');
+  return
+    '<table id="rental">'
+  . '  <tr>'
+  . '    <td class="fillin">'
+  .        drupal_render($form['street_address'])
+  .        drupal_render($form['square_feet'])
+  .        drupal_render($form['acreage'])
+  .        drupal_render($form['section_8'])
+  . '    </td>'
+  . '    <td class="cb">' . drupal_render($form['bedroom'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['bathroom'])       . '</td>'
+  . '    <td class="cb">' . drupal_render($form['building'])       . '</td>'
+  . '    <td class="cb">' . drupal_render($form['heat'])           . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" rowspan=2>' . drupal_render($form['area']) . '</td>'
+  . '    <td class="cb">' . drupal_render($form['furnishing'])     . '</td>'
+  . '    <td class="cb">' . drupal_render($form['storage'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['parking'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['student'])        . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb">' . drupal_render($form['feature'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['appliance'])      . '</td>'
+  . '    <td class="cb">' . drupal_render($form['pet'])            . '</td>'
+  . '    <td class="cb">' . drupal_render($form['smoker'])         . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" colspan=5>' . drupal_render($form['info']) . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="rent">'
+  .        drupal_render($form['rent'])
+  .        drupal_render($form['deposit'])
+  .        drupal_render($form['date_available'])
+  . '    </td>'
+  . '    <td class="no_yes">'
+  .        drupal_render($form['for_sale'])
+  .        drupal_render($form['last_month'])
+  .        drupal_render($form['ap_required'])
+  . '    </td>'
+  . '    <td class="cb">' . drupal_render($form['lease'])    . '</td>'
+  . '    <td class="cb">' . drupal_render($form['owner_pays']) . '</td>'
+  . '    <td id="rp" class="cb">' . drupal_render($form['renter_pays']). '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" colspan=5>' . drupal_render($form['ad_info']) . '</td>'
+  . '  </tr>'
+  . '</table>'
+  . '<div>' . drupal_render($form)  . '</div>';
 }
 
 // ----------------------------------------------------------------------------

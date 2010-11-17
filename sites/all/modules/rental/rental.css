@@ -90,7 +90,7 @@ table#rental #edit-section-8-wrapper label input {
 table#rental #edit-street-address-wrapper {margin:15px 0 0 0; line-height:100%} 
 table#rental #edit-street-address-wrapper label { line-height: 120% } 
 table#rental #edit-street-address-wrapper .description { line-height: 100% }
-table .form-item { margin-bottom: .5em }
+table .form-item { margin-bottom: 0 }
 td.fillin { vertical-align: top; padding: 0 10px; margin: 0 }
 td.no_yes { vertical-align: top; padding: 0 10px; margin: 0; width: 20%}
 td.rent   { vertical-align: top; padding: 0 10px; margin: 0; width: 20%}
@@ -101,6 +101,7 @@ td.cb .form-checkboxes, td.cb .form-radios { margin: 1px 0 }
 td.cb div label { vertical-align: middle; margin: 0; padding: 10px 5px; color: white; background-color: #054b81; }
 td.cb label.option { padding: 1px 0; font-size: .7em; 
                      color: #054b81; background-color: white; }
+td.cb label.option input { height: 3px; width: 3px }
 * td.cb div label { font-size: .8em }
 td#rp { width: 15%; margin: 10px }
 
@@ -133,16 +134,17 @@ table.rental td, table.contact td, table.search td { padding: 1px 10px }
 #rental-image-form img.thumb { height: 60px; margin: 5px 0px }
 #ad_post_images img.thumb    { height: 80px; margin: 5px 0px }
 #xxrental-image-form div.hovertip img,
-  #xxad_post_images div.hovertip img { height: 300 }
+  #xxad_post_images div.hovertip img { height: 300px }
 
 div#landlords, div#tenants { line-height: 1.3em; font-size: 1.1em }
 .hovertip, .hoverinfo {	width: auto; }
 
 #rental-post-form h2 { margin: 10px 0 20px }
+form#rental-lead-first-ad-form #rental td.rent {width: 160px}
+#rental td.rent {width: 240px}
 #edit-rent-wrapper,
 #edit-deposit-wrapper,
-#edit-date-available-wrapper {
-            width: 240px; height: 30px }
+#edit-date-available-wrapper { height: 30px }
 #edit-rent-wrapper label,
 #edit-deposit-wrapper label,
 #edit-date-available-wrapper label { 

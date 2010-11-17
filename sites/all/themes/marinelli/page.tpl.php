@@ -26,11 +26,11 @@
       <img id="RD_Logo_Blue"  src="/misc/RD_Logo_Blue.gif" />
       <span id="iconlinks" >
         <ul id="orbs" class="bubblewrap">
-          <li><a href="contact">
+          <li><a href="/contact">
             <img src="/misc/contact.png" alt="Contact Us"/></a></li>
-          <li><a href="user">
-            <img src="/misc/login.png" alt="Login" /></a></li>
-          <li><a href="faq">
+          <li><a href="/<?php print $logged_in? 'logout' : 'user';?>">
+            <img src="/misc/login.png" alt="<?php print $logged_in? 'Logout' : 'Login';?>" /></a></li>
+          <li><a href="/faq">
             <img src="/misc/QM_Bubble.png" alt="Frequently Asked Questions" />
               </a></li>
       </span>
