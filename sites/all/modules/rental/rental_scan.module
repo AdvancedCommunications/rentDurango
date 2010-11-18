@@ -370,7 +370,7 @@ function rental_scan_get_ads($f) {
   $s = "SELECT * FROM { lead } l JOIN {lead_ad} a"
      . " WHERE l.lid = a.lid and contact_info = '%s' and sid = %d"
      . " ORDER BY a.aid DESC";
-  $q = pager_query(db_rewrite_sql($s), $n, 0, NULL, $f['contact'], $sid);
+  $q = db_query($s, $f['contact'], $sid);
   while ($p = db_fetch_object($q)) {
     $url = 'http://rentdurango.net/scanupdate/' . "$p->aid/$d";
     $r[] = array(

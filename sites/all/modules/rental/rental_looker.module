@@ -45,8 +45,10 @@ function rental_search_form () { // ----------- full search form -------
   $form['parking']    = rental_box('radios', 'parking', 'Must have');
   $form['storage']    = rental_box('radios', 'storage', 'Must have');
   
-  $form['search']   = array('#type' => 'submit', '#value' => t('Search') );
-  $form['clear']    = array('#type' => 'submit', '#value' => t('Clear') );
+  $form['search']   = array('#type' => 'submit', '#value' => t('Search'),
+     '#attributes' => array('class'=>'positive') );
+  $form['clear']    = array('#type' => 'submit', '#value' => t('Clear'),
+     '#attributes' => array('class'=>'negative') );
   return $form;
 }
 function rental_search_form_validate($form) {
@@ -79,42 +81,54 @@ function rental_search_form_submit($form, &$form_state) {
 function theme_rental_search_form($form) {
   jquery_ui_add('ui.datepicker');
   drupal_add_js('$(function() {$(".datepicker").datepicker();});','inline');
-  return "\n<h2>Detailed Search</h2>\n"
+  return "\n<h2 id='title'>Detailed Search</h2>\n"
   . '<table id="search">'
   . '  <tr>'
-  . '    <td class="fillin">'
+  . '    <td id="fillin" rowspan=2>'
+  . '      <div id="rents">'
   . drupal_render($form['rent_from'])
   . drupal_render($form['rent_to'])
+  . '      </div>'
+  . '      <div id="rooms">'
   . drupal_render($form['bedroom'])
   . drupal_render($form['bathroom'])
+  . '      </div>'
+  . '      <div id="space">'
   . drupal_render($form['square_feet'])
   . drupal_render($form['acreage'])
+  . '      </div>'
+  . '      <div id="available">'
+  . drupal_render($form['before_after'])
+  . drupal_render($form['date_available'])
+  . '      </div>'
   . '    </td>'
-  . '    <td id="permits">'
-  .   drupal_render($form['student'])
-  .   drupal_render($form['smoker'])
-  .   drupal_render($form['pet'])
-  .   drupal_render($form['section_8'])
+  . '    <td id="permits" colspan=2>'
+  . drupal_render($form['student'])
+  . drupal_render($form['smoker'])
+  . drupal_render($form['pet'])
+  . drupal_render($form['section_8'])
   . '    </td>'
-  . '    <td class="cb" rowspan=2>' . drupal_render($form['area']) . '</td>'
-  . '    <td class="cb" rowspan=2>' . drupal_render($form['appliance']) .'</td>'
-  . '    <td class="cb" rowspan=2>' . drupal_render($form['feature'])  . '</td>'
-  . '  </tr>'
-  . '  <tr>'
-  . '    <td> </td>'
-  . '    <td id="available">'
-  .              drupal_render($form['before_after'])
-  .              drupal_render($form['date_available']) . '</td>'
-  . '  </tr>'
-  . '  <tr>'
-  . '    <td class="cb">' . drupal_render($form['lease'])      . '</td>'
-  . '    <td class="cb">' . drupal_render($form['building'])   . '</td>'
   . '    <td class="cb">' . drupal_render($form['furnishing']) . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb">' . drupal_render($form['building'])   . '</td>'
   . '    <td class="cb">' . drupal_render($form['parking'])    . '</td>'
   . '    <td class="cb">' . drupal_render($form['storage'])    . '</td>'
   . '  </tr>'
-  . '</table>'
-  . '<div>' . drupal_render($form) . '</div>';
+  . '  <tr>'
+  . '    <td class="cb">' . drupal_render($form['area']) . '</td>'
+  . '    <td class="cb">' . drupal_render($form['feature'])  . '</td>'
+  . '    <td class="cb">' . drupal_render($form['appliance']) .'</td>'
+  . '    <td class="cb">' . drupal_render($form['lease'])      . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="buttons">'
+  . drupal_render($form['search'])
+  . drupal_render($form['clear'])
+  .     '</td>'
+  . '  </tr>'
+  . drupal_render($form)
+  . '</table>';
 }
 function rental_browse() {  // ------------------------------------------------
  global $base_root, $user;
