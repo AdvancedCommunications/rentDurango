@@ -28,7 +28,7 @@
         <ul id="orbs" class="bubblewrap">
           <li><a href="/contact">
             <img src="/misc/contact.png" alt="Contact Us"/></a></li>
-          <li><a href="/<?php print $logged_in? 'logout' : 'user';?>">
+          <li><a href="<?php print $logged_in? '/logout' : '/user';?>">
             <img src="/misc/login.png" alt="<?php print $logged_in? 'Logout' : 'Login';?>" /></a></li>
           <li><a href="/faq">
             <img src="/misc/QM_Bubble.png" alt="Frequently Asked Questions" />
@@ -37,7 +37,7 @@
     </div>
 
     <div class="wrapper">
-      <div id="primary" class="<?php print marinelli_width($left,$right) ?>"> 
+      <div id="primary" class="<?php print $left? 'wide' : 'full'; ?>">
         <div class="singlepage">
           <?php if ($help) { print '<div class="help"><'. $help .'></div>'; } ?>
           <?php if ($messages) {print '<div class="messages">'

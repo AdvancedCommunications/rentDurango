@@ -2,7 +2,7 @@
 
 name = Marinelli
 
-description = A fresh 3-column layout for Drupal. Still usable over 4000m!
+description = 3-column layout for Drupal
 
 version = VERSION
 
@@ -14,6 +14,7 @@ stylesheets[all][] = layout.css
 stylesheets[all][] = graphics.css
 stylesheets[all][] = typography.css
 stylesheets[all][] = links.css
+stylesheets[all][] = rental.css
 
 
 

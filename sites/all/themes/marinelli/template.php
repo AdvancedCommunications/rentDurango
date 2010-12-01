@@ -1,24 +1,7 @@
 <?php
-//template for Marinelli Theme
-//author: singalkuppe - www.signalkuppe.com
-
-
-
-
 function marinelli_width($left, $right) {
-  $width = "short";
-  if (!$left ) {
-    $width = "long";
-  }  
-  
-   if (!$right) {
-    $width = "long";
-  }
-  return $width;
+  return ($left and $right)? 'thin' : (($left or $right) ? "wide" : "full");
 }
-
-
-
 /**
  * Return a themed breadcrumb trail.
  *
@@ -32,20 +15,15 @@ function phptemplate_breadcrumb($breadcrumb) {
         array_shift($breadcrumb);
        return '<div class="path"><p><span>'.t('You are here').'</span>'. implode(' / ', $breadcrumb) .'</p></div>';
   }
-  }
-
-
+}
 //overrides taxonomy term page function
 function marinelli_taxonomy_term_page($tids, $result) {
   drupal_add_css(drupal_get_path('module', 'taxonomy') .'/taxonomy.css');
-
   $output = '';
-
   // Only display the description if we have a single term, to avoid clutter and confusion.
   if (count($tids) == 1) {
     $term = taxonomy_get_term($tids[0]);
     $description = $term->description;
-
     // Check that a description is set.
     if (!empty($description)) {
       $output .= '<div class="terminfo"><p>';
@@ -53,20 +31,12 @@ function marinelli_taxonomy_term_page($tids, $result) {
       $output .= '</p></div>';
     }
   }
-
   $output .= taxonomy_render_nodes($result);
-
   return $output;
 }
-
-
-
-
-
 function marinelli_admin_page($blocks) {
   $stripe = 0;
   $container = array();
-
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', $block)) {
       if (empty($block['position'])) {
@@ -79,7 +49,6 @@ function marinelli_admin_page($blocks) {
       $container[$block['position']] .= $block_output;
     }
   }
-
   $output = '<div class="admin clear-block">';
   $output .= '<div class="compact-link"><p>'; // use <p> for hide/show anchor
   if (system_admin_compact_mode()) {
@@ -166,32 +135,11 @@ function phptemplate_get_primary_links() {
   return menu_tree(variable_get('menu_primary_links_source', 'primary-links'));
 }
 
-
 // retrieve custom theme settings
-
-
-$preload = theme_get_setting('cssPreload'); // print the js file if we choose css image preload
-
-if($preload == '1'){
-	
-	drupal_add_js(drupal_get_path('theme','marinelli').'/js/preloadCssImages.jQuery_v5.js'); // load the javascript
-	drupal_add_js('$(document).ready(function(){
-		
-	$.preloadCssImages();
-		
-	});
-	
-	','inline');
-
-}
-
-	
-$valore = theme_get_setting('menutype'); // if we choose dropdown
-
-if($valore == '1'){ 
- 
-    drupal_add_js(drupal_get_path('theme','marinelli').'/js/jquery.hoverIntent.minified.js'); // load the javascript
-	drupal_add_js(drupal_get_path('theme','marinelli').'/js/marinellidropdown.js'); // load the javascript
-	drupal_add_css(drupal_get_path('theme','marinelli').'/dropdown.css'); // load the css
-	
-}
+if(theme_get_setting('cssPreload') == '1') { // print the js file if we choose css image preload
+	drupal_add_js(drupal_get_path('theme','marinelli').'/js/preloadCssImages.jQuery_v5.js'); 
+	drupal_add_js('$(document).ready(function(){ $.preloadCssImages();	});	','inline'); }
+if(theme_get_setting('menutype') == '1') { // if we choose dropdown
+  drupal_add_js(drupal_get_path('theme','marinelli').'/js/jquery.hoverIntent.minified.js'); 
+	drupal_add_js(drupal_get_path('theme','marinelli').'/js/marinellidropdown.js'); 
+	drupal_add_css(drupal_get_path('theme','marinelli').'/dropdown.css'); }

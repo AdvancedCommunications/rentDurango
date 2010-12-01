@@ -17,8 +17,9 @@ body {margin:10px 0 20px 0;}
 #primary { float: left; margin: 0px; } /* width set with two classes below */
 #primary-form { margin: 0px; width: 970px; }
 	
-.short { width:550px; /* if we don't have the second sidebar */ }
-.long { width:745px; /* otherwise go wide... :) */ }
+.thin { width:550px; /* two sidebars */ }
+.wide { width:725px; /* one sidebar  */ }
+.full { width:940px; }
  
 .path{ /*breadcrumb*/ padding-bottom: 3px; }
 .path  p span { /* you are here text */ padding:5px; margin-right:10px; }

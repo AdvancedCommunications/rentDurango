@@ -1,3 +1,6 @@
+/* 
+   TODO
+*/
 @import url("rental-ie.css");
 @import url("rental-faq.css");
 div#header { border-bottom: 20px solid #054b81 }
@@ -35,7 +38,7 @@ table#search td#permits div.form-radios { margin: 0; width: 80px; padding: 0;
 table#search td#permits .form-radio { margin: 0; }
 table#search td#permits div.form-item { margin-top: 10px; width: 160px }
 table#search td#permits div div div.form-item { display: inline }
-table#search td#permits label { text-align: right; width: 110px; 
+table#search td#permits label { text-align: right; width: 110px;
     margin: 0; padding: 0; font-size: .9em; font-weight: bold; }
 table#search td#permits label input { margin: 0 }
 table#search div#rents,
@@ -63,7 +66,7 @@ table#search div#available div#edit-date-available-wrapper input {
 #primary div#list p { padding-left: 40px; text-align: justify }
 #primary div#list img.right_float { margin: 0 0 0 20px; float: right; height: 130px }
 #primary div#list img.left_float  { margin: 0 20px 0 0; float: left;  height: 130px }
- 
+
 div.wrapper #primary div#sitemission p {
   font-family:Georgia,"Times New Roman",Times,serif;
   font-size:1.4em; font-style:italic; line-height:120%; text-align:center }
@@ -76,7 +79,7 @@ table#teasers tr.even:hover { background-color: #ffe }
 table#teasers tr.odd { background-color: #eff }
 table#teasers tr.odd:hover { background-color:#ffe }
 table#teasers div.browse_post { width: 130px }
-table#teasers div.browse_post span { 
+table#teasers div.browse_post span {
   display: inline-block; width: 45px; text-align: right; font-weight: bold }
 img.thumb { height: 50px }
 
@@ -84,8 +87,8 @@ fieldset.ad_post { padding: 20px 12px; font-size: 1.6em; line-height: 1.4em;
                    font: arial }
 fieldset.ad_post span { font-weight: bold }
 fieldset.ad_unit { padding: 20px 12px; font-size: 1.2em; line-height: 1.2em; }
- 
- 
+
+
 table#rental { line-height: 0; font-size: .9em }
 table#rental .form-radios, table#rental .form-checkboxes { padding: 0 5px 1px}
 table#rental .form-item { vertical-align: middle; line-height: .6em }
@@ -94,12 +97,12 @@ table#rental #edit-acreage-wrapper label { margin: 0; padding: 5px 0 5px 30px;
               font-size: .8em; font-weight: normal; float: left }
 table#rental #edit-square-feet,
 table#rental #edit-acreage { margin: 0 0 0 5px; float: right }
-table#rental #edit-section-8-wrapper label { margin: 5px 0 5px 30px; 
+table#rental #edit-section-8-wrapper label { margin: 5px 0 5px 30px;
           float: left; font-size: .8em; font-weight: normal; }
 table#rental #edit-section-8-wrapper label input {
           margin: -5px 0 0 25px; float: right }
-table#rental #edit-street-address-wrapper {margin:15px 0 0 0; line-height:100%} 
-table#rental #edit-street-address-wrapper label { line-height: 120% } 
+table#rental #edit-street-address-wrapper {margin:15px 0 0 0; line-height:100%}
+table#rental #edit-street-address-wrapper label { line-height: 120% }
 table#rental #edit-street-address-wrapper .description { line-height: 100% }
 table .form-item { margin-bottom: 0 }
 td.fillin { vertical-align: top; padding: 0 10px; margin: 0 }
@@ -110,7 +113,7 @@ td.cb > div { border: 1px solid #054b81; padding-bottom: 3px }
 td.cb .form-checkboxes .form-item, td.cb .form-radios .form-item {margin:1px 0}
 td.cb .form-checkboxes, td.cb .form-radios { margin: 1px 0 }
 td.cb div label { vertical-align: middle; margin: 0; padding: 10px 5px; color: white; background-color: #054b81; }
-td.cb label.option { padding: 1px 0; font-size: .7em; 
+td.cb label.option { padding: 1px 0; font-size: .7em;
                      color: #054b81; background-color: white; }
 * td.cb div label { font-size: .8em }
 td#rp { width: 15%; margin: 10px }
@@ -123,7 +126,7 @@ table.rental td, table.contact td, table.search td { padding: 1px 10px }
 .street { font-weight: bold }
 
 #rental-quick-search-form .form-item { margin: 0; padding: 0; line-height: 1em }
-#rental-quick-search-form label { margin: 1px; width: 70px; 
+#rental-quick-search-form label { margin: 1px; width: 70px;
                     display: inline-block; text-align: right; font-size: .8em; }
 #rental-quick-search-form input { margin: 1px; padding: 0; font-size: .8em;
                      display: inline; text-align: right; }
@@ -157,18 +160,18 @@ form#rental-lead-first-ad-form #rental td.rent {width: 160px}
 #edit-date-available-wrapper { height: 30px }
 #edit-rent-wrapper label,
 #edit-deposit-wrapper label,
-#edit-date-available-wrapper label { 
+#edit-date-available-wrapper label {
      margin: 0; padding: 0; text-align: right; float: left }
 #edit-rent, #edit-deposit, #edit-date-available { margin: 0; float: right }
 #edit-for-sale-wrapper label, #edit-ap-required-wrapper label,
 #edit-last-month-wrapper label {
      margin: 0; padding: 5px 0 5px 30px; float: left; width: 300px }
-#edit-for-sale, #edit-last-month, #edit-ap-required { 
+#edit-for-sale, #edit-last-month, #edit-ap-required {
      margin: 0 15px 0 5px; float: right }
 form#rental-scan-form #edit-rent { float: none }
 
 .clear { overflow: hidden; width: 100%;}
-.butt { 
+.butt {
   background: transparent url('http://rentdurango.net/misc/button_right.gif')
     no-repeat scroll top right;
   color: #444; display: block; float: left; font: normal 12px arial, sans-serif;
@@ -179,7 +182,7 @@ form#rental-scan-form #edit-rent { float: none }
 .butt:hover { background-position: right -24px; color: #000; outline: none;}
 .butt:hover span { background-position: 0 -24px; padding: 6px 0 4px 18px;}
 .butt:active { background-position: bottom right; color: #444; outline: none;}
-.butt:active span { background-position: bottom left; padding: 6px 0 4px 18px;} 
+.butt:active span { background-position: bottom left; padding: 6px 0 4px 18px;}
 
 .buttons a, .buttons input.form-submit {
     display:block; float:left; margin: 10px;
@@ -217,5 +220,6 @@ input.negative, .buttons a.negative  { color:#d12f19; padding: 5px 10px 6px 27px
     background-color: #ebc3c4; border: 1px solid #fbe3e4; color:#fbe3e4 }
 .buttons a.negative:active {
     background-color:#dba3a4; border:1px solid #ebc3c4; color:#fff }
+
 
 
