@@ -1,0 +1,17 @@
+/* 
+    Document   : rental-ie
+    Created on : Dec 1, 2010, 12:25:04 AM
+    Author     : damian
+    Description:
+        This file contains any IE specific css.  Called from rental.css
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
