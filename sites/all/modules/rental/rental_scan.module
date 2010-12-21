@@ -349,6 +349,7 @@ function rental_scan_form(&$form_state) {
     $form['ad_copy'] = array(
          //   '#type'  => 'textarea', '#cols'  => 40, '#rows' => 3,
              '#type' => 'textfield',
+        '#maxlength' => 2048,
             '#title' => t('Ad copy'),
       '#description' => t('Enter the ad verbatim.') );
     $form['focus']   = array(
@@ -358,7 +359,7 @@ function rental_scan_form(&$form_state) {
     $form['cancel']  = array(
              '#type' => 'submit', '#value' => t('Cancel') ); }
   else {
-    $form['instruct']   = array( '#value' => rental_scan_instructions(1) );
+    $form['phpinstruct']   = array( '#value' => rental_scan_instructions(1) );
     $form['ad_date'] = array(
         '#type' => 'textfield', 
         '#title' => 'Ad Date', '#size'  => 8,

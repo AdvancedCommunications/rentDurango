@@ -1,0 +1,15 @@
+; $Id: commentreference.info,v 1.1.4.2 2008/04/06 16:38:33 swentel Exp $
+name = Comment Reference
+description = Defines a field type for referencing a comment.
+dependencies[] = content
+dependencies[] = text
+dependencies[] = optionwidgets
+package = CCK
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-10-27
+version = "6.x-1.3"
+core = "6.x"
+project = "commentreference"
+datestamp = "1256659533"
+

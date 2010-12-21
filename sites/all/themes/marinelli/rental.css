@@ -119,6 +119,7 @@ td.cb label.option { padding: 1px 0; font-size: .7em;
 td#rp { width: 15%; margin: 10px }
 
 .adcount td, .adcount th { padding: 0 5px 0 }
+table#ad_stats td, table#ad_stats th { padding: 0 5px 0; text-align: right }
 table.contact td.label { text-align: right; font-weight: bold }
 table.rental td, table.contact td, table.search td { padding: 1px 10px }
 .end-fieldset { margin: 15px 10px 0 0 }

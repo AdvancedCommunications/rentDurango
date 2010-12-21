@@ -18,7 +18,7 @@ body {margin:10px 0 20px 0;}
 #primary-form { margin: 0px; width: 970px; }
 	
 .thin { width:550px; /* two sidebars */ }
-.wide { width:725px; /* one sidebar  */ }
+.wide { width:745px; /* one sidebar  */ }
 .full { width:940px; }
  
 .path{ /*breadcrumb*/ padding-bottom: 3px; }

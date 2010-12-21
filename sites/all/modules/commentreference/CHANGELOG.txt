@@ -1,0 +1,5 @@
+6.x-1.2
+-------
+- SA-CONTRIB-2009-021 http://drupal.org/node/434836
+- #396774: feature request, limit comments to x days
+- #298923: fix db_rewrite_sql issues

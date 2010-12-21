@@ -15,3 +15,4 @@ root {
     display: block;
 }
 
+table#rental .form-item {line-height: 1.2em !important; vertical-align: top !important}
