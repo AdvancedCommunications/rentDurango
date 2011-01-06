@@ -89,8 +89,24 @@
  *   $db_url = 'mysqli://username:password@localhost/databasename';
  *   $db_url = 'pgsql://username:password@localhost/databasename';
  */
-$db_url = 'mysql://rusty_drpl1:4IO1Y4gFkHqX@localhost/rusty_drpl1';
-$db_prefix = '';
+$a = $_SERVER['SERVER_NAME'];
+switch ($a){
+  case 'local.rentdurango.net':
+    $db_url = 'mysql://rusty_drpl1:nail@local.rentdurango.net/rusty_drpl1';
+    $base_url = 'http://local.rentdurango.net';  // NO trailing slash!
+    break;
+  case 'rentdurango.net':
+    $db_url = 'mysql://rusty_drpl1:4IO1Y4gFkHqX@localhost/rusty_drpl1';
+    $base_url = 'http://rentdurango.net';  // NO trailing slash!
+    break;
+  default:
+    $db_url = 'mysql://rusty_drpl1:4IO1Y4gFkHqX@localhost/rusty_drpl1';
+    $base_url = 'http://rentdurango.net';  // NO trailing slash!
+    break;
+}
+
+//  $db_url = 'mysql://rusty_drpl1:nail@local.rentdurango.net/rusty_drpl1';
+//  $db_prefix = '';
 
 /**
  * Access control for update.php script
@@ -122,7 +138,8 @@ $update_free_access = FALSE;
  * It is not allowed to have a trailing slash; Drupal will add it
  * for you.
  */
-$base_url = 'http://rentdurango.net';  // NO trailing slash!
+// **DAL 11-1-6 Assigned above 
+// $base_url = 'http://local.rentdurango.net';  // NO trailing slash!//
 
 /**
  * PHP settings:

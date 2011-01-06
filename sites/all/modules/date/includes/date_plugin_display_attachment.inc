@@ -21,14 +21,16 @@ class date_plugin_display_attachment extends views_plugin_display_attachment {
 
   function options(&$display) {
     parent::options($display);
-    $display->display_options['style_plugin'] = 'date_nav';
-    $display->display_options['items_per_page'] = 0;
-    $display->display_options['row_plugin'] = '';
-    //$display->display_options['defaults']['style_plugin'] = FALSE;
-    $display->display_options['defaults']['style_options'] = FALSE;
-    $display->display_options['defaults']['items_per_page'] = FALSE;
-    $display->display_options['defaults']['row_plugin'] = FALSE;
-    $display->display_options['defaults']['row_options'] = FALSE;
-  } 
+    if(is_object($display)){
+      $display->display_options['style_plugin'] = 'date_nav';
+      $display->display_options['items_per_page'] = 0;
+      $display->display_options['row_plugin'] = '';
+      //$display->display_options['defaults']['style_plugin'] = FALSE;
+      $display->display_options['defaults']['style_options'] = FALSE;
+      $display->display_options['defaults']['items_per_page'] = FALSE;
+      $display->display_options['defaults']['row_plugin'] = FALSE;
+      $display->display_options['defaults']['row_options'] = FALSE;
+    }
+  }
 }
 
