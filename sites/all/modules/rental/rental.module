@@ -143,6 +143,11 @@ function repack($data) {
   return implode(', ', $dList);
 }
 function rental_box($type, $labels, $heading = NULL, $db = NULL, $df = NULL) {
+  // type: cb (for checkboxes), radio, or radios
+  // labels: table of values listed in box 
+  // heading: alternate used at top of box (defaults to labels)
+  // db: alternate table used for labels
+  // df: defaults
   global $edit, $process;
   $options = array();
   if ($type == 'cb') { $default = array(); }
@@ -157,9 +162,11 @@ function rental_box($type, $labels, $heading = NULL, $db = NULL, $df = NULL) {
   if ($process == 'add') { $df = $default; }
   else {
     if ( $type == 'cb' ) {
-       if (isset($edit->$db)) { $df = explode(', ', $edit->$db); } }
+       if (isset($edit->$db)) { $df = explode(', ', $edit->$db); }
+       if (isset($edit->$df)) { $df = explode(', ', $edit->$df); } }
     else {
-       if (isset($edit->$db)) { $df = $edit->$db; } } }
+       if (isset($edit->$db)) { $df = $edit->$db; }
+       if (isset($edit->$df)) { $df = $edit->$df; } } }
   $box = array( '#type' => $type == 'cb'? 'checkboxes' : $type,
                '#title' => t(ucfirst($heading)), '#options' => $options);
   if (isset($df)) { $box['#default_value'] = $df; }

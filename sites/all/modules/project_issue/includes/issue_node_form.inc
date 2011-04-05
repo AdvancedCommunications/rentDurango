@@ -283,6 +283,17 @@ function _project_issue_form($node, $form_state, $include_metadata_fields = FALS
       '#options' => $categories,
       '#required' => TRUE,
     );
+    // DAL 1/15/11 Modifies stage in project_issue_acs_stage
+      list($av, $h) = project_issue_acs_stage_get_allowed_values();
+      $v[] = "Choose Stage";
+      foreach ($av as $value) {
+        $v[] =  $value[2];
+      }
+    $form['issue_info']['stage'] = array (
+      '#type' => 'select',
+      '#title' => t('Stage'),
+      '#options' => $v
+    );
     $form['issue_info']['priority'] = array(
       '#type' => 'select',
       '#title' => t('Priority'),
@@ -476,6 +487,8 @@ function _project_issue_insert($node) {
   }
 
   db_query("INSERT INTO {project_issues} (nid, pid, category, component, priority, rid, assigned, sid, original_issue_data, last_comment_id, db_lock) VALUES (%d, %d, '%s', '%s', %d, %d, %d, %d, '%s', %d, %d)", $node->nid, $node->pid, $node->category, $node->component, $node->priority, $node->rid, $node->assigned, $node->sid, serialize($original_issue_data), 0, 0);
+  // DAL 1/15/11 Add new stage value to project_issue_acs_stage
+  db_query("INSERT INTO {project_issue_acs_stage} (nid, value) VALUES (%d, %d)", $node->nid,$node->stage-1);
 
   // Invalidate the "Issue cockpit" block cache for this project, since the
   // new issue will have altered the summary totals.

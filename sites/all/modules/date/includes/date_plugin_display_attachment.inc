@@ -31,6 +31,6 @@ class date_plugin_display_attachment extends views_plugin_display_attachment {
       $display->display_options['defaults']['row_plugin'] = FALSE;
       $display->display_options['defaults']['row_options'] = FALSE;
     }
-  }
+  } 
 }
 

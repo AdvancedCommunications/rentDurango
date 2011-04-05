@@ -43,6 +43,11 @@ function _project_issue_view($node, $teaser = FALSE, $page = FALSE) {
       'label' => t('Category'),
       'current' => project_issue_category($node->project_issue['category'], 0),
     );
+    // TODO 1/15/11 DAL - Remove if you can get the hook project_issue_acs_project_issue_metadata to work
+    $current_data['stage'] = array(
+      'label' => t('Stage'),
+      'current' => project_issue_acs_stage_value(project_issue_acs_stage_record($node->nid)),
+    );
     $current_data['priority'] = array(
       'label' => t('Priority'),
       'current' => project_issue_priority($node->project_issue['priority']),

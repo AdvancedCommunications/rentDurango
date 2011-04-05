@@ -1,0 +1,427 @@
+<?php
+function rental_lead_perm() {
+  return array('sales leads');
+}
+function rental_lead_menu() {
+  return array(
+    'lead' => array(
+        'title' => 'Sales Leads',
+        'page callback' => 'rental_lead_summary',
+        'access arguments' => array('sales leads'),
+        'type' => MENU_CALLBACK ),
+    'lead/detail' => array(
+        'title' => 'Sales Lead',
+        'page callback' => 'rental_lead_detail',
+        'access arguments' => array('sales leads'),
+        'type' => MENU_CALLBACK ),
+    'lead/temp/ad/delete' => array(
+        'title' => 'Sales Lead',
+        'page callback' => 'rental_lead_temp_ad_delete',
+        'access arguments' => array('sales leads'),
+        'type' => MENU_CALLBACK ),
+    'lead/temp/ad/renew' => array(
+        'title' => 'Sales Lead',
+        'page callback' => 'rental_lead_temp_ad_renew',
+        'access arguments' => array('sales leads'),
+        'type' => MENU_CALLBACK )
+      );
+}
+function rental_lead_form(&$form_state) {
+  $f = $form_state['values'];
+  $form['lead-summary'] = array( '#value' => rental_lead_summary($f) );
+  return $form;
+}
+function rental_lead_summary($lid = NULL) {
+  $ad = rental_get_ad_date_range_array();
+  return rental_ad_stats($ad) . rental_lead_list($ad['active']);
+}
+function rental_ad_stats($d) {
+  foreach ( $d['ad_count'] as $date=>$value) { // cut off at 10 or so
+    if ($count++ > 9) { break; }
+    $dw = date("l", mktime(0,0,0,substr($date,5,2),substr($date,8,2),substr($date,0,4)));
+    $dt = substr($date, 5, 5);
+    $scanner = rental_get_mail($d['scanner'][$date]);
+    $ex = $d['ad_count'][$date];
+    $st = isset($d['ad_started'][$date])? $d['ad_started'][$date] : 0;
+    $xp = isset($d['ad_expired'][$date])? $d['ad_expired'][$date] : 0;
+    $r[] = array( 'data' => array($dw, $dt, $scanner, $ex, $st, $xp) ); }
+  $h = array('', 'Date', 'Scanner', 'Count', 'New', 'Exp');
+  return theme('table', $h, $r, array('id' => 'ad_stats', 'align' => 'center'));
+}
+function rental_get_mail($uid) {
+  return db_result(db_query("SELECT mail FROM {users} WHERE uid = %d", $uid));
+}
+function rental_lead_list($actives) {
+  $sl = rental_get_sorted_leads($actives);
+  $h  = array('', 'History', 'Contact Info');
+  foreach ($sl as $v) {
+    $url = 'http://rentdurango.net/lead/detail/' . $v['lid'];
+    $contacts = isset($v['contacts'])? $v['contacts'] : 0;
+    $label = ($contacts > 0 or $v['ad_count'] > 1)?
+     '(Contacts: ' . $v['contacts'] . ', Ads: ' . $v['ad_count'] . ') ' : '';
+    $r[] = array(
+      'data' => array( ++$i, $label, $v['c_info'] ),
+      'onclick' => "document.location.href='$url';", 'style' => 'cursor:pointer' ); }
+  return theme('table', $h, $r, array('id' => 'teasers', 'align' => 'center'));
+}
+function rental_get_sorted_leads($active) {
+  $sortable = array();
+  $ac = rental_get_ad_counts();
+  $cc = rental_get_contact_counts();
+  $q = db_query("SELECT * FROM { lead } ORDER BY lid DESC");
+  while ($p = db_fetch_object($q)) {
+    if ( !isset($active[$p->lid]) ) { continue; }
+    $sortable[] = array(
+      lid      => $p->lid,
+      contacts => isset($cc[$p->lid])? $cc[$p->lid] : 0.0, // sort ascending
+      ad_count => isset($ac[$p->lid])? $ac[$p->lid] : 0,   // subsort desc
+      c_info   => $p->contact_info ); }
+  usort($sortable, 'rental_lead_sort');
+  return $sortable;
+}
+function rental_get_ad_counts() {
+  $a = array();
+  $s = "SELECT * FROM { lead } l JOIN {lead_ad} a"
+     . " WHERE l.lid = a.lid ORDER BY l.lid";
+  $q = db_query($s);
+  while ($p = db_fetch_object($q)) {
+    $a['total_ads']++;
+    if ($p->lid == $last_lead) { $i++; continue; }
+    $a['total_leads']++;
+    $a[$last_lead] = $i + 1;
+    $last_lead = $p->lid;
+    $i = 0;  }
+  $a[$last_lead] = $i + 1;
+  return $a;
+}
+function rental_lead_sort($a, $b) {
+  if ($a['contacts'] > $b['contacts']) { return 1; }
+  if ($a['contacts'] < $b['contacts']) { return -1; }
+  if ($a['ad_count'] > $b['ad_count']) { return -1; }
+  if ($a['ad_count'] < $b['ad_count']) { return 1; }
+  return 0;
+}
+function rental_get_contact_counts() {
+  $c = array();
+  $q = db_query("SELECT * FROM { lead_contact }");
+  while ($p = db_fetch_object($q)) { $c[$p->lid] += $p->rank; }
+  return $c;
+}
+// -----------------------------------------------------------------
+function rental_get_ad_date_range_array() {
+  $d['ad_count'] = $d = array();
+  $d['new_today'] = $last_ad = 0;
+  $s = "SELECT * FROM { lead_ad } a JOIN { lead_ad_date } d"
+     . " WHERE a.aid = d.aid ORDER by a.aid, d.date";
+  $q = db_query($s);
+  while ($p = db_fetch_object($q)) {
+    $date_of_ad = date('Y/m/d', $p->date);
+    $d['scanner'][$date_of_ad] = $p->uid;
+    if (rental_lead_ad_is_recent($date_of_ad)) {
+      $d['active'][$p->lid] = 1; }
+    if ($p->aid == $last_ad and $date_of_ad == $last_dt) { continue; }
+    $d['ad_count'][$date_of_ad]++;
+    if ($p->aid == $last_ad) { // still processing an ongoing ad
+       $d[$p->aid]['last'] = $date_of_ad;
+       $next_date = date('Y/m/d', $p->date + 60 * 60 * 24);
+       continue; }
+    // new ad, so finish processing last ad
+    if ($last_ad > 0) {
+      $d['ad_expired'][$next_date]++; }
+    // now begin processing the new ad
+    $d['ad_started'][$date_of_ad]++;
+    $d[$p->aid]['first'] = $d[$p->aid]['last'] = $date_of_ad;
+    // finish the loop
+    $last_ad = $p->aid;
+    $next_date = date($f, $p->date + 60 * 60 * 24);
+    $last_dt = $date_of_ad;  }
+  if ($last_ad > 0) {  // done with loop, so finish up last ad
+      $d['ad_expired'][$next_date]++; }
+  krsort($d['ad_count']);
+  return $d;
+}
+function rental_lead_ad_is_recent($this_date) {
+  $days =  variable_get('rental_lead_days_until_expiration', 2);
+  $last_acceptable_date = date('Y/m/d', time() - $days * 24*60*60);
+  if ($this_date >= $last_acceptable_date) { return TRUE; }
+  return FALSE;
+}
+// ---------------------------------------------------------------
+function rental_lead_detail($id) {
+  global $lid;
+  $lid = $id;
+  // this page can be used by an admin to:
+  //   1) enter a summary of contact with this sales lead
+  //   2) create an account for this lister
+  //   3) post an ad for this lead's property which will be:
+  //      a complementary ad if an account is also being created
+  //      otherwise a temporary ad
+  //   if an account already exists for this lead
+  //      the post will create a complementary ad
+
+  // $user_exists = someFunction();
+  drupal_add_js('misc/collapse.js');
+  drupal_add_css('/modules/node/node.css');
+
+  return rental_lead_detail_title($lid)
+       . rental_lead_contact_list($lid)
+       . rental_lead_ad_list($lid)
+       . rental_lead_temporary_ads($lid)
+       . ($user_exists? rental_button('Masquerade As This User', 'masq')
+                      : drupal_get_form('rental_lead_first_ad_form') );
+}
+function rental_lead_contact_list($lid) {
+  // get contact history
+  return $contact_history?
+         "<fieldset class=' rental collapsible collapsed'>"
+       . "  <legend>Contact History</legend>"
+       .    $contact_history
+       . "</fieldset>\n"
+       : " <h3>(No sales lead contacts have been reported)</h3>";
+}
+function rental_lead_first_ad_form() {
+  global $lid;
+  return array_merge( rental_lead_contact_form(),
+                      rental_contact_info_form(),
+                      rental_form(),
+                      rental_lead_ad_post_form()  );
+}
+function rental_lead_contact_form() {
+  global $lid;
+  $form['lid']       = array('#type' => 'value', '#value' => $lid );
+  $form['date']      = array('#type' => 'value', '#value' => time() );
+  $form['uid']       = array('#type' => 'textfield', '#size' => 4, '#title' => t('User ID'),
+                       '#description' => t('Enter only if a user account is known for this lead.') );
+  $form['category']  = rental_box('radios', 'lead_contact_category', 'Category', 'category');
+  $form['note']      = array('#type' => 'textarea', '#cols'  => 40, '#rows' => 3, '#title' => t('Notes'), '#description' => t('') );
+  $form['save']      = array('#type' => 'submit', '#value' => t('Save'));
+  $form['cancel']    = array('#type' => 'submit', '#value' => t('Cancel') );
+  return $form;
+}
+function rental_contact_info_form() {
+  $form['user_name']       = array('#type' => 'textfield', '#size' => 14, '#title' => t('User Name'), '#description' => t('') );
+  $form['email_address']   = array('#type' => 'textfield', '#size' => 14, '#title' => t('Email Address'), '#description' => t('Optional') );
+  $form['mailing_address'] = array('#type' => 'textfield', '#size' => 14, '#title' => t('Mailing Address'), '#description' => t('Optional') );
+  $form['phone_numbers']   = array('#type' => 'textfield', '#size' => 14, '#title' => t('Phone Numbers'),
+                            '#description' => t('Enter as many as desired. You may include descriptions such as "Cell" or "Evenings only".') );
+  $form['other_info']      = array('#type' => 'textarea', '#cols'  => 40, '#rows' => 3, '#title' => t('General Info'),
+                            '#description' => t('This will be added to all ad postings for this account.') );
+  $form['save']            = array('#type' => 'submit', '#value' => t('Save'));
+  $form['cancel']          = array('#type' => 'submit', '#value' => t('Cancel') );
+  return $form;
+}
+function rental_lead_ad_post_form() {   // ---------- rental_post_form --------------
+  $form['aid']             = array('#type' => 'value', '#value' => $aid );
+  $form['rent']            = array('#type' => 'textfield', '#title' => t('Monthly rent'), '#size'  => 3);
+  $form['deposit']         = array('#type' => 'textfield', '#title' => t('Deposit'), '#size'  => 3);
+  $form['date_available']  = array('#type' => 'textfield', '#title' => 'Date available', '#size'  => 8,
+                             '#attributes' => array('class' => 'datepicker'), '#default_value' => date('m/d/Y', time() ));
+  $form['for_sale']        = rental_no_yes( 0, "Is property currently being marketed for sale?");
+  $form['last_month']      = rental_no_yes( 0, "Is last month's rent also required at move-in?");
+  $form['ap_required']     = rental_no_yes( 0, "Should renters supply their info when contacting you?");
+  $form['lease']           = rental_box('radios', 'lease');
+  $form['owner_pays']      = rental_box('cb','expense', 'Owner pays');
+  $form['renter_pays']     = rental_box('cb','expense', 'Renter pays');
+  $form['ad_info']         = array('#type'=>'textarea', '#cols' => 10, '#rows' => 1,
+                         '#default_value' => '', '#title' => t('Any other important information') );
+  $form['post']            = array('#type' => 'submit', '#value' => t('Activate Temporary Ad') );
+  return $form;
+}
+function rental_lead_ad_list($lid) {
+  $d = rental_get_ad_date_range_array();
+  $s = "SELECT * FROM { lead_ad } a JOIN { lead_source } s"
+     . " WHERE a.sid = s.sid and a.lid = %d ORDER by aid";
+  $q = db_query($s, $lid);
+  while ($p = db_fetch_object($q)) {
+    $first = substr( $d[$p->aid]['first'],5,5);
+    $last  = substr( $d[$p->aid]['last'], 5,5);
+    $date_range = $first == $last? "$first " : "$first to $last ";
+    $r[] = array( 'data' => array($p->aid, $p->source, $date_range, $p->ad_copy)); }
+  $h = array('Ad ID', 'Source', 'Date Range', 'Ad Copy');
+  return "<fieldset class=' rental collapsible'>"
+       . "  <legend>Competitive Ad History</legend>"
+       . theme('table', $h, $r, array('id' => 'teasers', 'align' => 'center'))
+       . "</fieldset>\n" ;
+}
+function rental_lead_temporary_ads($lid) {
+  $q = db_query("SELECT * FROM { lead_temporary } WHERE lid = %d", $lid);
+  while ($p = db_fetch_object($q)) {
+    $f['selected'][] = $p->pid; }
+  if ($f['selected'] == 0) { return ''; }
+  $s = "SELECT * FROM { post } p"
+     . " JOIN { rental } r ON p.rid = r.rid"
+     . " JOIN {lead_temporary} l ON l.pid = p.pid"
+     . " WHERE p.pid IN (%s)";
+  $q = db_query($s, implode(',',$f['selected']));
+  while ($p = db_fetch_object($q)) {
+    $view   = l(rental_lead_teaser($p),     'http://rentdurango.net/ad/' . $p->pid);
+ //   $edit   = l(rental_lead_temp_edit($p),  'http://rentdurango.net/lead/temp/ad/edit/' . $p->temporary);
+    $expire = l(rental_lead_temp_expire($p),'http://rentdurango.net/lead/temp/ad/renew/' . $p->temporary,
+                array('html' => 'true', 'attributes' => array('class' => 'expiration')));
+    $delete = l('delete',                   'http://rentdurango.net/lead/temp/ad/delete/' . $p->temporary);
+    $active = date('M d', (int) $p->temporary);
+ //   $r[] = array( 'data' => array($active, $p->uid, $view, $delete)); }
+    $r[] = array($active, $p->uid, $view, $expire, $delete); }
+ //  $h = array('Activated', 'By', '', 'Expires', '');
+  $h = array('Activated', 'By', '', array('data' => 'Expires', 'class' => 'expires'), '');
+  return "<fieldset class=' rental collapsible'>"
+       . "  <legend>Currently Active Temporary Ads</legend>"
+       . theme('table', $h, $r, array('id' => 'teasers', 'align' => 'center'))
+       . "</fieldset>\n" ;
+}
+function rental_lead_temp_expire($p) {
+  $expiration = $p->activated + variable_get('rental_temp_expiration',  7) * 24*60*60;
+  return '<div>' . date('m/d', $expiration) . '</div><span>Renew</span>';
+}
+function rental_lead_teaser($p) {
+  $p->desc = ($p->square_feet > 0? "$p->square_feet sq.ft. " : '')
+           . "$p->furnishing $p->building"
+           . ($p->acreage > 1? " with $p->acreage acres" : '');
+  $a = array( 'area', 'bedroom', 'bathroom', 'desc', 'parking', 'storage');
+  foreach ($a as $i) {
+    if (isset($p->$i) and strlen($p->$i) > 0) { $desc[] = $p->$i; } }
+  return implode(', ', $desc);
+}
+function rental_lead_detail_title($lid) {
+  $q = db_query("SELECT contact_info FROM { lead } WHERE lid = %d", $lid);
+  $t = db_fetch_object($q);
+  return '<h3>Info For ' . $t->contact_info . ' (lid=' . $lid . ')</h3>';
+}
+function theme_rental_lead_first_ad_form($form) {
+  jquery_ui_add('ui.datepicker');
+  drupal_add_js('$(function() {$(".datepicker").datepicker();});','inline');
+  return
+    "<style type='text/css'>#primary {width:100%}</style>"
+  . "<fieldset class=' sales_contact collapsible collapsed'>"
+  . " <legend>Report a Sales Contact</legend>"
+  . drupal_render($form['category'])
+  . drupal_render($form['note'])
+  . drupal_render($form['uid'])
+  . "</fieldset>"
+  . "<fieldset class=' contact_info collapsible collapsed'>"
+  . " <legend>Account Contact Info (leave empty when creating a temporary ad)</legend>"
+  . drupal_render($form['user_name'])
+  . drupal_render($form['email_address'])
+  . drupal_render($form['mailing_address'])
+  . drupal_render($form['phone_numbers'])
+  . drupal_render($form['other_info'])
+  . "</fieldset>"
+  . "<fieldset class=' rental collapsible collapsed'>"
+  . " <legend>Create a Temporary Ad</legend>"
+  . ' <table id="rental">'
+  . '  <tr>'
+  . '    <td class="fillin">'
+  .        drupal_render($form['street_address'])
+  .        drupal_render($form['square_feet'])
+  .        drupal_render($form['acreage'])
+  .        drupal_render($form['section_8'])
+  . '    </td>'
+  . '    <td class="cb">' . drupal_render($form['bedroom'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['bathroom'])       . '</td>'
+  . '    <td class="cb">' . drupal_render($form['building'])       . '</td>'
+  . '    <td class="cb">' . drupal_render($form['heat'])           . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" rowspan=2>' . drupal_render($form['area']) . '</td>'
+  . '    <td class="cb">' . drupal_render($form['furnishing'])     . '</td>'
+  . '    <td class="cb">' . drupal_render($form['storage'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['parking'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['student'])        . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb">' . drupal_render($form['feature'])        . '</td>'
+  . '    <td class="cb">' . drupal_render($form['appliance'])      . '</td>'
+  . '    <td class="cb">' . drupal_render($form['pet'])            . '</td>'
+  . '    <td class="cb">' . drupal_render($form['smoker'])         . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" colspan=5>' . drupal_render($form['info']) . '</td>'
+  . '  </tr>'
+  . ' </table>'
+  . ' <table id="ad_info">'
+  . '  <tr>'
+  . '    <td class="rent">'
+  .        drupal_render($form['rent'])
+  .        drupal_render($form['deposit'])
+  .        drupal_render($form['date_available'])
+  . '    </td>'
+  . '    <td class="no_yes">'
+  .        drupal_render($form['for_sale'])
+  .        drupal_render($form['last_month'])
+  .        drupal_render($form['ap_required'])
+  . '    </td>'
+  . '    <td class="cb">' . drupal_render($form['lease'])    . '</td>'
+  . '    <td class="cb">' . drupal_render($form['owner_pays']) . '</td>'
+  . '    <td id="rp" class="cb">' . drupal_render($form['renter_pays']). '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" colspan=5>' . drupal_render($form['ad_info']) . '</td>'
+  . '  </tr>'
+  . '  <tr>'
+  . '    <td class="cb" colspan=5>' . drupal_render($form['post']) . '</td>'
+  . '  </tr>'
+  . ' </table>'
+  . "</fieldset>\n"
+  . drupal_render($form);
+}
+function rental_lead_first_ad_form_validate($form, &$form_state) {
+  $f = $form_state['values'];
+  if ($f['op'] == 'Activate Temporary Ad') {
+    if ($f['street_address'] == '') {
+      form_set_error('street_address',
+                   t('You must enter a unique street address.') ); } }
+}
+function rental_lead_first_ad_form_submit($form, &$form_state ) {
+  $f = $form_state['values'];
+  if ($f['op'] == 'Activate Temporary Ad') {    //$form_state['redirect'] = 'lead';
+    rental_lead_temporary_ad($f); }
+  if ($sales_contact) { rental_log_sales_contact($f); }
+  if ($contact_info)  { rental_create_lister_account($f); }
+}
+function rental_lead_temporary_ad($f) {
+  global $user, $lid;
+  $now = time();
+  db_query( "INSERT INTO {rental} (
+    uid, street_address, square_feet, acreage, section_8, bedroom, bathroom, parking, storage,
+    building, furnishing, appliance, student, smoker, pet, area, feature, heat, info, temporary )
+    VALUES (%d, '%s', %d, %d, %d, '%s','%s','%s','%s',
+           '%s','%s','%s', '%s','%s','%s', '%s','%s','%s', '%s','%s' )",
+    $user->uid, t($f['street_address']), $f['square_feet'], $f['acreage'], $f['section_8'],
+    $f['bedroom'], $f['bathroom'], $f['parking'], $f['storage'],
+    $f['building'], $f['furnishing'], repack($f['appliance']),
+    $f['student'], $f['smoker'], $f['pet'],
+    $f['area'], repack($f['feature']), $f['heat'],
+    $f['info'], $now);
+  $rid = db_result(db_query("SELECT rid FROM {rental} WHERE temporary = '%s'", $now));
+  $rate_code_for_temp_ads = variable_get('rate_code_for_temporary ads', 4);
+  db_query( "INSERT INTO {post} ( rid, activated, cancelled,
+    rent, deposit, date_available, for_sale, last_month, lease, owner_pays, renter_pays, ad_info, rate, temporary)
+    VALUES (%d, %d, %d,  %d, %d, '%s', %d, %d, '%s', '%s', '%s', '%s', %d, '%s')",
+    $rid, $now, 0,
+    $f['rent'], $f['deposit'], rental_date_convert($f['date_available']),
+    $f['for_sale'], $f['last_month'], $f['lease'],
+    repack($f['owner_pays']), repack($f['renter_pays']),
+    t($f['ad_info']), $rate_code_for_temp_ads, $now);
+  $pid = db_result(db_query("SELECT pid FROM {post} WHERE temporary = '%s'", $now));
+
+//  db_query("INSERT INTO {lead_temporary} (lid, temporary) VALUES (%d, '%s')", $f['lid'], $now );
+  db_query("INSERT INTO {lead_temporary} (temporary, lid, rid, pid) VALUES ('%s', %d, %d, %d)", $now, $lid, $rid, $pid);
+
+}
+function rental_lead_temp_ad_delete($temp) {
+  $lid = db_result(db_query("SELECT lid FROM {lead_temporary} WHERE temporary = '%s'", $temp));
+  $q   = db_query("SELECT rid, pid FROM {lead_temporary} WHERE temporary = '%s'", $temp);
+  while ($p = db_fetch_object($q)) {
+    db_query("DELETE FROM {rental} WHERE rid = %d", $p->rid);
+    db_query("DELETE FROM {post}   WHERE pid = %d", $p->pid);
+    db_query("DELETE FROM {lead_temporary} WHERE temporary = '%s'", $temp); }
+  return rental_lead_detail($lid);
+}
+function rental_lead_temp_ad_renew($temp) {
+  $lid = db_result(db_query("SELECT lid FROM {lead_temporary} WHERE temporary = '%s'", $temp));
+  $q = db_query("SELECT pid FROM {lead_temporary} WHERE temporary = '%s'", $temp);
+  while ($p = db_fetch_object($q)) {
+    $pid = $p->pid;
+    db_query("UPDATE {post} SET activated = %d WHERE pid = %d", time(), $pid); }
+  return rental_lead_detail($lid);
+}

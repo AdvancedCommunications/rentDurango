@@ -156,24 +156,30 @@ function rental_browse() {  // ------------------------------------------------
    $url = 'http://rentdurango.net/ad/' . $p->pid;
    $r[] = array(
     'data' => array(
-           rental_browse_image($p, $i), 
-           rental_browse_post($p, $i),
-           rental_browse_unit($p, $i) ),
+           rental_browse_image($p), 
+           rental_browse_post($p),
+           rental_browse_unit($p) ),
     'onclick' => "document.location.href='$url';", 'style'=> 'cursor:pointer');}
  $a = array('id' => 'teasers', 'align' => 'center');
  print theme('table', NULL, $r, $a);
  print theme('pager', NULL, 10, 0);
 }
 function rental_selection_array($t) {
- $x = time() - 30 * 24 * 60 * 60; // expired activations
+ $now = time();
+ $x = $now - variable_get('rental_post_expiration', 30) * 24*60*60;
+ $t = $now - variable_get('rental_temp_expiration',  7) * 24*60*60;
+ $rate_code_for_temp_ads = variable_get('rate_code_for_temporary ads', 4);
  $s = "SELECT * FROM { post } p JOIN { rental } r"
-    . "  WHERE p.rid = r.rid and cancelled = 0 and activated > %d";
- $q = db_query($s, $x);
+    . "  WHERE p.rid = r.rid and cancelled = 0"
+    . "    and not (activated < %d"
+    . "         or (rate = 0  and activated < %d)"
+    . "         or (rate = %d and activated < %d))";
+ $q = db_query($s, $x, $rate_code_for_temp_ads, $t);
  $f['selected'] = array();
  $f['available']= 0;
  while ($p = db_fetch_object($q)) {
    $f['available']++;
-   if ( rental_rejected($p, $t) ) { continue; }  
+   if ( rental_rejected($p, $t) ) { continue; }
    $f['selected'][] = $p->pid; }
  return $f; 
 }
@@ -186,7 +192,9 @@ function rental_criteria() {
 }
 function rental_rejected($p, $t) {
   if ( $p->rent < $t->rent_from ) { return TRUE; }
-  if ( $p->rent > $t->rent_to   ) { return TRUE; }
+
+//  if ( $p->rent > $t->rent_to   ) { return TRUE; }
+
   $bed = substr($p->bedroom,0,1) > 0? substr($p->bedroom,0,1) : 0;
   if ( $bed < $t->bedroom ) { return TRUE; } 
   $ba = substr($p->bathroom,0,1) > 0? substr($p->bathroom,0,1) : 0;
@@ -208,6 +216,7 @@ function rental_rejected($p, $t) {
     if (rental_option_not_selected($t, $p, $o)) { return TRUE; } }
   foreach ( array('appliance', 'feature') as $o ) {
     if (rental_option_not_offered($t, $p, $o)) { return TRUE; } }
+  return FALSE;
 }
 function rental_option_not_selected($t, $p, $o) { // single option on posting
   if ($t->$o == '') { return FALSE; }  
@@ -237,10 +246,11 @@ function rental_ad($pid) {
  $q = db_query($s, $pid);
  $returnURL = variable_get('URL' . session_id(), '');
  while ($p = db_fetch_object($q)) {
+   $is_temp_ad = ($p->rate == variable_get('rate_code_for_temporary ads', 4));
    $ad = array(rental_ad_image($p),
                rental_ad_post($p),
                rental_ad_unit($p),
-               rental_ad_contact($p),
+               ($is_temp_ad? '' : rental_ad_contact($p)),
                rental_ad_print($p) );
    // if user is admin, add buttons to:
    //   1) return to search 2) de-activate this ad post // otherwise,
@@ -263,31 +273,39 @@ function rental_ad_image($p) {
           : "$image $hover";
 }
 function rental_ad_post($p) {
-  $date_avail = date('M d', (int) $p->date_available);
-  $lease = ucfirst($p->lease) . ' lease';
+  $date_avail = $p->date_available < time()? 'Now' : date('M d', (int) $p->date_available);
+  $lease = strlen($p->lease) > 0? ucfirst($p->lease) . ' lease' : '';
   return "\n<fieldset class='ad_post'>\n"
        . "  <div><span>Rent:</span> " . number_format($p->rent) . "</div>\n"
        . "  <div><span>Deposit:</span> ".number_format($p->deposit)."</div>\n"
        . "  <div>Available $date_avail</div>\n"
-       . "  <div>$lease</div>\n</fieldset>\n";
+       . "  <div>$lease</div>\n"
+       . "  <div>$p->ad_info</div>\n"
+       . "</fieldset>\n";
 }
 function rental_ad_unit($p) {
   $sf = $p->square_feet > 0? "$p->square_feet sq.ft. " : '';
   $ac = $p->acreage > 1? " with $p->acreage acres" : ''; 
 
-  $line1 = array( $p->area, $p->bedroom, $p->bathroom, 
-                  $sf . "$p->furnishing $p->building" . $ac);
-  if (isset($p->parking)) { $line1[] = $p->parking; }
-  if (isset($p->storage)) { $line1[] = $p->storage; }
+  $line1 = array();
+  $l = array($p->area, $p->bedroom, $p->bathroom, 
+         $sf . "$p->furnishing $p->building" . $ac,
+         $p->parking, $p->storage);
+  foreach ($l as $item) {
+    if (strlen($item) > 0) { $line1[] = $item; } }
+  $line0 = "  <div>" . $p->street_address . "</div>\n";
   $line1 = "  <div>" . implode(', ', $line1) . ".</div>\n";
   $line2 = (isset($p->feature) and strlen($p->feature) > 0)?
            "  <div>" .ucfirst($p->feature).".</div>\n" : '';
-  $restricts = ucfirst(implode(', ',array($p->student,$p->smoker,$p->pet)));
-  $line3 = "  <div>$restricts.</div>\n";
+  foreach ( array($p->student,$p->smoker,$p->pet) as $r) {
+    if (strlen($r) > 0) { $rArray[] = $r; } }
+  if (sizeof($rArray) > 0) {
+    $restricts = ucfirst(implode(', ', $rArray));
+    $line3 = "  <div>$restricts.</div>\n"; }
   $line4 = (isset($p->info) and strlen($p->info) > 0)?
            "  <div>$p->info</div>\n" : '';
   return "\n<fieldset class='ad_unit'>\n"
-       . " $line1 $line2 $line3 $line4 </fieldset>\n"; 
+       . " $line0 $line1 $line2 $line3 $line4 </fieldset>\n";
 }
 function rental_ad_contact($p) {
   $u = $p->uid;
@@ -339,7 +357,7 @@ function rental_ad_print($p) {
 }
  
 // --------------------------------- browse the rental ad postings ------------
-function rental_browse_image($p, $i) {
+function rental_browse_image($p) {
   $default_image = array(
     'apartment'=>'apt_for_rent3',
     'duplex' => 'duplex_for_rent',
@@ -353,7 +371,7 @@ function rental_browse_image($p, $i) {
   return strlen($teaser_image) > 0? $teaser_image
        : "<div><img class='thumb' src='$thumb' /></div>";
 }
-function rental_browse_post($p, $i) {
+function rental_browse_post($p) {
   $date_avail = date('M d', (int) $p->date_available);
   $lease = ucfirst($p->lease) . ' lease';
   return "\n<div class='browse_post'\n>"
@@ -362,7 +380,7 @@ function rental_browse_post($p, $i) {
        . "  <div>Available $date_avail</div>\n"
        . "  <div>$lease</div>\n</div>\n";
 }
-function rental_browse_unit($p, $i) {
+function rental_browse_unit($p) {
   $p->desc = ($p->square_feet > 0? "$p->square_feet sq.ft. " : '')
            . "$p->furnishing $p->building"
            . ($p->acreage > 1? " with $p->acreage acres" : '');

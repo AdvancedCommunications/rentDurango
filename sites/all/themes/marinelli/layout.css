@@ -267,7 +267,7 @@ p span.tagsteaser{padding-left:23px;}
 #primary .singlepage .search-results dt{margin-top:10px;}
 
 /* --------------Collapsible fieldsets------------- */
-fieldset { margin: 1em 0; padding: 1em; display:block; clear:left;
+fieldset { margin: 1em 0; padding: 0 1em; display:block; clear:left;
   width:95%; overflow:visible; }
 
 /* Targets IE 7. Fixes background image in field sets. */

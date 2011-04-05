@@ -1,8 +1,6 @@
-/* 
-   TODO
-*/
 @import url("rental-ie.css");
 @import url("rental-faq.css");
+
 div#header { border-bottom: 20px solid #054b81 }
 img#for_rent_sign { height: 80px; position: relative; top: 10px; left: 10px }
 img#RD_Logo_Blue  { position: relative; left: 40px }
@@ -119,6 +117,7 @@ td.cb label.option { padding: 1px 0; font-size: .7em;
 td#rp { width: 15%; margin: 10px }
 
 .adcount td, .adcount th { padding: 0 5px 0 }
+table#scan td, table#scan th { padding: 0 5px 0; text-align: left }
 table#ad_stats td, table#ad_stats th { padding: 0 5px 0; text-align: right }
 table.contact td.label { text-align: right; font-weight: bold }
 table.rental td, table.contact td, table.search td { padding: 1px 10px }
@@ -221,6 +220,8 @@ input.negative, .buttons a.negative  { color:#d12f19; padding: 5px 10px 6px 27px
     background-color: #ebc3c4; border: 1px solid #fbe3e4; color:#fbe3e4 }
 .buttons a.negative:active {
     background-color:#dba3a4; border:1px solid #ebc3c4; color:#fff }
-
-
-
+a.expiration div { display: block; text-align: center }
+a.expiration:hover div { display: none }
+a.expiration span { display: none }
+a.expiration:hover span { display: block; color: #d12f19; text-align: center }
+thead th.expires { text-align: center }

@@ -1,0 +1,7 @@
+; $Id$
+name = Project issue ACS
+description = Provides custom ACS functionality for project_issue, adds stage to issue
+dependencies[] = project
+dependencies[] = project_issue
+package = Project
+core = 6.x

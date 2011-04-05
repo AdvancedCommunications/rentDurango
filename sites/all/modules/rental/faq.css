@@ -1,33 +1,67 @@
-/* accordian.css */
-.capt, .capb { 
- background: url("http://rentdurango.net/sites/all/modules/jquery_ui/jquery.ui/demos/real-world/accordion-drawers/images/caps.gif") repeat-x;
-        height:4px; width:100%; z-index:100; margin:0px; padding:0px }
-.capt { position:absolute; background-position:0 -4px }
-.capb { margin-top:-19px }
-.drawers-wrapper {position:relative; margin: 5px 5px; border: 10px double #054a80}
-.drawers { margin-bottom:15px; color:#054a80; font-size:11px; line-height:18px}
-.drawer {color: #054a80; text-align: justify; font-size:12px; width:100% line-height:1.3em;
-        /* for IE6 & 7 */}
-.drawer-handle {
-        background-color:#054a80; cursor:default; 
-        text-align: justify; color:#FFFFFF; text-indent: 15px; font-size:12px; width:100%}
-.drawer-handle.open {
-        background-color:#054a80; cursor:default; 
-        text-align: justify; color:#FFFFFF; text-indent: 15px; font-size:12px; width:100%}
-h2.drawer-handle span {}
-.drawer ul {background-color: #53cddc; padding: 0 12px; padding-bottom:0pt }
-        /* for IE6 - to override the colour set by .drawer-handle.open (IE6 cannot handle class concatinations) */
-* html .drawer ul { background-color: #FFFFFF; margin: 0 1px }
-.drawer li { background-color: #53cddc border-bottom: 1px solid #E5E5E5; line-height:16px; padding:6px 0pt }
-.drawer-content ul { padding-top: 7px;}
-.drawer-content li a { display:block; overflow:hidden }
-.alldownloads li { border:0pt none; line-height:18px; padding:0pt }
-.drawers a { color:#666666; text-decoration:none; font-family:"Lucida Grande",Geneva,Arial,Verdana,sans-serif }
-#primary .singlepage .node .content .drawers-wrapper ul li {background: none;}
-#primary .singlepage .node .content ol, #primary .singlepage .comment ol {background-color: #53cddc; padding-left: 25px; padding-right: 5px; margin: 0}
-#primary .singlepage .node .content ul, #primary .singlepage .comment ul, #primary .singlepage .comment ol, #primary .singlepage form ul {margin: 0;}
-#primary .singlepage .node .content li, #primary .singlepage .comment li {margin: 0; padding-left: 0;}
-#primary .singlepage table tr td p {background-color: #53cddc; margin: 0 5px;}
-#primary .singlepage .drawer h2 {margin: 0; border-bottom: 1px solid #000000; border-top: 1px solid #000000; color: white; font-weight: 100}
-#primary .singlepage h2 {color: #054a80; font-weight: 600}
 #primary .singlepage h1 {color: #9a0505; text-align: center; font-size: 3em; font-weight: 900; text-decoration: underline; margin: 40px 0}
+#primary .singlepage .node .content ul, #primary .singlepage .comment ul, #primary .singlepage .node .content ol, #primary .singlepage .comment ol, #primary .singlepage form ul {margin: 0}
+
+
+/* @group FAQ */
+
+div#faq {
+	margin-top: 20px;
+	display: block;
+}
+
+div#faq dl {
+	display: block;
+}
+
+div#faq dl dt.question {
+	min-height: 21px;
+	margin-bottom: 15px;
+	padding-left: 21px;
+	background: url(/misc/icon_faq_16px.png) no-repeat left 2px;
+	font-weight: bold;
+	line-height: 1.25em;
+        font-size: 1em;
+}
+
+div#faq dl dt.question a {
+	display: block;
+	border: none;
+}
+
+div#faq dl dt.question span.left {
+	width: 440px;
+}
+
+div#faq dl dt.question span.right {
+	max-width: 80px;
+} 
+
+div#faq dl dt a span.toggle {	
+	min-height: 12px;
+	margin-left: 5px;
+	padding: 2px 5px 2px 5px;
+	font-size: 11px;	
+	font-weight: bold;
+	color: #fff;
+	background-color: #7DB9EB;
+	border-radius: 4px;
+	-webkit-border-radius: 4px;
+}
+
+div#faq dl dt a:hover span.toggle {
+	background: #003371;	
+}
+
+div#faq dl dd {
+	margin-bottom: 25px;
+	padding-left: 21px;
+}
+
+div#faq dl dd.answer {
+	display: none;
+	font-size: 0.95em;	
+	line-height: 1.4em;
+}
+
+
+/* @end */

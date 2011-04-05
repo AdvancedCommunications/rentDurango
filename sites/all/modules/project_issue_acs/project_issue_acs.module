@@ -1,0 +1,278 @@
+<?php
+/*
+ * Functions for dealing with new field stage in project_issue_acs_stage
+ * with allowed values in project_issue_acs_stage_av
+ *
+ * Also made code modifications to files in project_issue, identified by comment signed
+ * by DAL.
+ *
+ * code modifications to these files:
+ * project_issue.module
+ * issue_node_form.inc
+ * issue_node_view.inc
+ */
+
+/*
+ * Main function for page that modifies the stage of a project_issue
+ *
+ * Lists a table of project issues (linked to related tables) in a pager then
+ * gathers a new NID and stage to be updated/inserted
+ */
+function project_issue_acs_stage(){
+  list($r, $h) = project_issue_acs_stage_get_allowed_values();
+  $av = $r;
+  //$pre = theme('table', $h, $r, array('id' => 'Content Type', 'align' => 'center'));
+  list($r, $h) = project_issue_acs_project_issue_table();
+  $pit = $r;
+  $pi = theme('table', $h, $r, array('id' => 'Content Type', 'align' => 'center'));
+  $pager = theme('pager',Null,30,0);
+  // Call to stage modification form
+  $stage_form = drupal_get_form("project_issue_acs_update_stage",$av,$pit);
+  $head = 'Change the issue stage';
+  return $head . $pre . $pi . $pager . $stage_form;
+}
+/*
+ * Stage and NID selection form
+ *
+ * Check boxes for NID and Stage, Submit and Cancel buttons
+ * @param
+ *  $form_state
+ *  $av = allowed values for stage from project_issue_acs_stage_av (None, Immediate, ...)
+ *  $pit = paged project issue table (NID, TITLE, CATEGORY, ...)
+*/
+function project_issue_acs_update_stage(&$form_state,$av,$pit) {
+  $form = array();
+  $form['container'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Change Issue Stage'),
+    '#description' => t('Alter the Stage for a Issue')
+    );
+
+  $p[] = "Choose NID";
+  foreach ($pit as $value) {
+    $p[] =  $value[0];
+  }
+  $form['container']['NID'] = array (
+    '#type' => 'select',
+    '#title' => 'NID',
+    '#options' => $p
+  );
+  $v[] = "Choose Stage";
+  foreach ($av as $value) {
+    $v[] =  $value[2];
+  }
+  $form['container']['stage'] = array (
+    '#type' => 'select',
+    '#title' => 'Stage',
+    '#options' => $v
+  );
+
+  $form['submit'] = array (
+    '#type' => 'submit',
+    '#value' => t('Submit Stage')
+  );
+  $form['cancel'] = array (
+    '#type' => 'submit',
+    '#value' => t('Cancel')
+  );
+  return $form;
+}
+
+/*
+ * Validate the submitted values
+ */
+function project_issue_acs_update_stage_validate (&$form, &$form_state){
+  if($form_state['values']['op'] == "Submit Stage") {
+    if($form_state['values']['NID'] == "0"  && $form_state['values']['stage'] == "0") {
+      form_error($form, t('Please choose a NID and Stage'));
+    }
+  }
+}
+/*
+ *  Update the stage in the database using values gathered in the form
+ *
+ * @param
+ *
+ * $form_state['values']['op'] = Form submission button pressed, 'Submit Stage' or 'Cancel'
+ * $form_state['values']['stage'] = submitted stage
+ */
+function project_issue_acs_update_stage_submit (&$form, &$form_state){
+  // values returned from form
+  $fv = $form_state['values'];
+  // possible NIDs values
+  $fnid = $form['container']['NID']['#options'];
+  $nid = $fnid[$fv['NID']];
+  switch ($fv['op']) {
+    case 'Submit Stage' :
+      // If there is already a record UPDATE otherwise INSERT new
+      if(is_numeric(project_issue_acs_stage_record($nid))) {
+        $s = "UPDATE project_issue_acs_stage SET value = %d WHERE nid = %d";
+        $r = db_query($s, $fv['stage']-1, $nid);
+      }
+      else {
+        $s = "INSERT INTO project_issue_acs_stage (value, nid) VALUES ( %d, %d)";
+        $r = db_query($s, $fv['stage']-1, $nid);
+      }
+      break;
+    case 'Cancel' :
+      $form_state['redirect'] = 'project/issues/';
+      break;
+  }
+}
+/*
+ * Get Stage key from value
+ */
+function project_issue_acs_stage_key($val){
+  list($av,$a) = project_issue_acs_stage_get_allowed_values();
+  foreach ($av as $key => $option) {
+    if($val == $option[2]) {
+      return $option[0];
+    }
+  }
+}
+
+/*
+ * Get Stage value from key
+*/
+function project_issue_acs_stage_value($k){
+  list($av,$a) = project_issue_acs_stage_get_allowed_values();
+  foreach ($av as $key => $option) {
+    if($k == $option[0]) {
+      return $option[2];
+    }
+  }
+}
+
+/*
+ * Returnes allowed values for a project_issue_stage
+ *
+ * @return
+ *  $r = allowed values
+ *  $h = titles
+ */
+
+function project_issue_acs_stage_get_allowed_values(){
+  $query =  "SELECT * FROM {project_issue_acs_stage_av} ORDER BY weight ASC";
+  $query_result = db_query($query);
+  while ($lines = db_fetch_object($query_result)) {
+    $r[] = array($lines->sid,$lines->weight,$lines->av);
+  }
+  $h = array("SID", "WEIGHT", "AV");
+  return array($r, $h);
+}
+/*
+ * Returnes a value for a project_issue_acs_stage
+ *
+ * @return
+ *  $r = text values
+ */
+function project_issue_acs_stage_record($nid){
+  $query =  "SELECT * FROM {project_issue_acs_stage} where nid = %d ";
+  $query_result = db_query($query, $nid);
+  while ($lines = db_fetch_object($query_result)) {
+    $r = $lines->value;
+  }
+  return $r;
+}
+/*
+ * Returnes allowed values for the project_issue_state
+ *
+ * @return
+ *  $r = allowed values
+ *  $h = titles
+ */
+function project_issue_acs_state_get_allowed_values(){
+  $query =  "SELECT * FROM {project_issue_state}";
+
+  $query_result = db_query($query);
+  while ($lines = db_fetch_object($query_result)) {
+    $r[] = array($lines->sid,$lines->weight,$lines->name,$lines->author_has);
+  }
+  $h = array("SID", "WEIGHT", "NAME", "AUTHOR_HAS");
+  return array($r, $h);
+}
+/*
+ * Returnes the fields in the project_issues table
+ * joined with fields in node, project_issue_acs_stage,
+ * and project_issue_acs_stage_av tables
+ *
+ * @return
+ *  $r = joined project issue tables
+ *  $h = titles
+*/
+function project_issue_acs_project_issue_table(){
+  $query = "SELECT pi.nid, "
+       . "node.title, "
+       . "pi.category, "
+       . "pi.component, "
+       . "project_issue_acs_stage_av.av, "
+       . "pi.priority, "
+       . "pi.assigned, "
+       . "project_issue_state.name stname, "
+       . "u.name uname "
+       . "FROM {project_issues} pi "
+           . "LEFT OUTER JOIN {node} "
+             . "ON pi.nid = node.nid "
+           . "LEFT OUTER JOIN {project_issue_acs_stage} "
+             . "ON pi.nid = project_issue_acs_stage.nid "
+           . "LEFT OUTER JOIN {project_issue_acs_stage_av} "
+             . "ON project_issue_acs_stage.value = project_issue_acs_stage_av.sid "
+           . "LEFT OUTER JOIN {project_issue_state} "
+             . "ON pi.sid = project_issue_state.sid "
+           . "LEFT OUTER JOIN {users} u "
+             . "ON pi.assigned = u.uid";
+
+  $query_result = pager_query($query,30,0);  // query output in pager
+  while ($lines = db_fetch_object($query_result)) {
+    $ltitle = "<a href=/node/" . $lines->nid . ">" . $lines->title . "</a>";
+    $r[] =  array($lines->nid, $ltitle, $lines->category, $lines->component, $lines->av, $lines->priority, $lines->uname, $lines->stname);
+  }
+  $h = array("NID","TITLE","CATEGORY","COMPONENT","STAGE","PRIORITY","ASSIGNED", "STATE");
+  return array($r, $h);
+}
+
+/*
+ * Help settings
+ */
+function project_issue_acs_help($path, $arg) {
+
+  $output = ''; 
+  switch ($path) {
+    case "admin/help#project_issue_acs":
+      $output = '<p>'.  t("Custom code for projec_issue") .'</p>';
+      break;  }
+  return $output;
+}
+/*
+ * Set permissions
+ */
+function project_issue_acs_perm() {
+  $perms = array(
+    'edit project issue stage'  );
+  return $perms;
+}
+/*
+ * Menu setting for this module
+ */
+function project_issue_acs_menu() {
+
+  $items = array();
+
+  $items['project/issue_acs_stage'] = array(
+    'title' => 'Project Issue Stage',
+    'page callback' => 'project_issue_acs_stage',
+    'access arguments' => array('edit project issue stage'),
+    'type' => MENU_NORMAL_ITEM  );
+
+  return $items;
+}
+/**
+ * Implementation of hook_views_api().
+ * Tells Drupal there are views hooks in this module
+*/
+function project_issue_acs_views_api() {
+  return array(
+    'api' => 2.0
+//    'path' => drupal_get_path('module', 'project_issue_acs') .'/views',
+  );
+}

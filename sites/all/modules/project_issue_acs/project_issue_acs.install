@@ -1,0 +1,35 @@
+<?php
+/* This is the SQL used to create the tables needed for project_issue_acs:
+CREATE TABLE `rusty_drpl1`.`project_issue_acs_stage` (
+`nid` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'link to node.nid',
+`value` INT UNSIGNED NOT NULL COMMENT 'text value in project_issue_acs_stage_av.av'
+) ENGINE = MYISAM ;
+
+CREATE TABLE `rusty_drpl1`.`project_issue_acs_stage_av` (
+`sid` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`weight` INT NOT NULL ,
+`av` VARCHAR( 255 ) NOT NULL COMMENT 'Allowed Value',
+`description` VARCHAR( 255 ) NOT NULL COMMENT 'Description'
+) ENGINE = MYISAM COMMENT = 'stage allowed values';
+
+
+ * Use module Schema to prepair above SQL to create a install script
+ *
+ * @tables
+ *   project_issue_acs_stage: link to node
+ *   project_issue_acs_stage_av: allowed values, should be populated with allowed stage values
+ *    (ie sid = 1, weight = 10, av = 'Immediate', Description = 'ASAP'
+ *        sid = 2, weight = 20, av = 'PreLaunch', Description = 'Complete before launch')
+
+ INSERT INTO `rusty_drpl1`.`project_issue_acs_stage_av` (
+`sid` ,
+`weight` ,
+`av` ,
+`description`
+)
+VALUES (
+'1', '10', 'Immediate ', 'ASAP'
+);
+ */
+
+?>

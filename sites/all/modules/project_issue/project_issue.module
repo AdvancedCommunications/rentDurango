@@ -1566,6 +1566,12 @@ function project_issue_query_result_links($project_arg = NULL) {
         'attributes' => array('title' => t('Receive e-mail updates about issues.')),
       );
     }
+    // DAL 1/15/11 Added to link to project_issue_acs stage modification page
+    $links['stage'] = array(
+      'title' => t('Change Stage'),
+      'href' => "project/issue_acs_stage",
+      'attributes' => array('title' => t('Change the issue stage.')),
+    );
   }
   else {
     // We know the project, make project-specific links.
